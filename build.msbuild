@@ -7,6 +7,7 @@
         <NpmPackOutputDir>$(MSBuildThisFileDirectory)npmpackoutput\</NpmPackOutputDir>
         <WebPackTestDir>$(MSBuildThisFileDirectory)test\webpacktest\</WebPackTestDir>
     </PropertyGroup>
+
     <Target Name="Build">
         <ReadLinesFromFile File="@(VersionFile)">
             <Output TaskParameter="Lines" PropertyName="PackageVersion"/>
@@ -15,6 +16,13 @@
         <Exec Command="npm version --no-git-tag-version --allow-same-version $(PackageVersion)" />
         <Exec Command="gulp" />
         <Exec Command="nuget pack $(NuspecPath) -Version $(PackageVersion)" />
+
+        <MSBuild Projects ="$(MSBuildProjectFullPath)"
+            Properties="PackageVersion=$(PackageVersion)"
+            Targets="Test" />
+    </Target>
+
+    <Target Name="Test">
         <Message Text="Testing Webpack build..." />
         <MakeDir Directories="$(NpmPackOutputDir)" />
         <Exec Command="npm pack $(MSBuildThisFileDirectory)" WorkingDirectory="$(NpmPackOutputDir)" />
