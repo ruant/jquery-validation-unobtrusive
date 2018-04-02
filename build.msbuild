@@ -4,6 +4,8 @@
     </ItemGroup>
     <PropertyGroup>
         <NuspecPath>Microsoft.jQuery.Unobtrusive.Validation.nuspec</NuspecPath>
+        <NpmPackOutputDir>$(MSBuildThisFileDirectory)npmpackoutput\</NpmPackOutputDir>
+        <WebPackTestDir>$(MSBuildThisFileDirectory)test\webpacktest\</WebPackTestDir>
     </PropertyGroup>
     <Target Name="Build">
         <ReadLinesFromFile File="@(VersionFile)">
@@ -13,5 +15,12 @@
         <Exec Command="npm version --no-git-tag-version --allow-same-version $(PackageVersion)" />
         <Exec Command="gulp" />
         <Exec Command="nuget pack $(NuspecPath) -Version $(PackageVersion)" />
+        <Message Text="Testing Webpack build..." />
+        <MakeDir Directories="$(NpmPackOutputDir)" />
+        <Exec Command="npm pack $(MSBuildThisFileDirectory)" WorkingDirectory="$(NpmPackOutputDir)" />
+        <Exec Command="npm init -y" WorkingDirectory="$(WebPackTestDir)" />
+        <Exec Command="npm install $(NpmPackOutputDir)jquery-validation-unobtrusive-$(PackageVersion).tgz --save-dev --force" WorkingDirectory="$(WebPackTestDir)" />
+        <Exec Command="npm install webpack webpack-cli --save-dev" WorkingDirectory="$(WebPackTestDir)" />
+        <Exec Command="npx webpack" WorkingDirectory="$(WebPackTestDir)" />
     </Target>
 </Project>
